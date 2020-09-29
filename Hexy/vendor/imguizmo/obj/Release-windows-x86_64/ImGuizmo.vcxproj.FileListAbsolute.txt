@@ -1,0 +1,2 @@
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGuizmo\bin\Release-windows-x86_64\ImGuizmo.lib.lastcodeanalysissucceeded
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGuizmo\obj\Release-windows-x86_64\NativeCodeAnalysis.read.1.tlog

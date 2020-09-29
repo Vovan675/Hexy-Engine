@@ -1,0 +1,2 @@
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGui\bin\Debug-windows-x86_64\ImGui.pdb
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGui\obj\Debug-windows-x86_64\ImGui.pdb

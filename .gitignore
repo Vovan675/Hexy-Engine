@@ -1,0 +1,10 @@
+﻿.vs
+bin
+bin-int
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.csproj
+*.user
+*.log

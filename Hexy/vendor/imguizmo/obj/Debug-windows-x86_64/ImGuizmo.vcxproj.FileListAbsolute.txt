@@ -1,0 +1,2 @@
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGuizmo\bin\Debug-windows-x86_64\ImGuizmo.pdb
+C:\Users\Vova\source\repos\HexyEngine\Hexy\vendor\ImGuizmo\obj\Debug-windows-x86_64\ImGuizmo.pdb
