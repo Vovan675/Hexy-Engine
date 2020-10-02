@@ -28,7 +28,7 @@ namespace Hexy
 		void EditorLayer::OnAttach()
 		{
 			rendererSettings = SceneRenderer::GetSettings();
-
+			
 			int width;
 			int height;
 			glfwGetWindowSize(Application::Instance->GetWindow(), &width, &height);

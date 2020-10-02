@@ -10,6 +10,7 @@ namespace Hexy
 		public:
 			EditorMenu() {}
 			void OnImgui();
+			void BuildProject(const std::string& path);
 		};
 	}
 }
