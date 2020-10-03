@@ -33,13 +33,6 @@ namespace Hexy
 
 				isUsing = true;
 			}
-			//Zooming in/out
-			else if (mouseScroll.y != 0) 
-			{
-				m_distance -= mouseScroll.y;
-
-				isUsing = true;
-			}
 			//Flying around
 			else if (Input::IsMouseButtonDown(1))
 			{
@@ -48,6 +41,13 @@ namespace Hexy
 				m_yaw -= mouseDelta.x * yawSign;
 
 				isFlying = true;
+				isUsing = true;
+			}
+			//Zooming in/out
+			else if (mouseScroll.y != 0) 
+			{
+				m_zoomVelocity -= mouseScroll.y * 10;
+
 				isUsing = true;
 			}
 			else 
@@ -81,6 +81,12 @@ namespace Hexy
 			}
 			else
 			{
+				if (m_zoomVelocity != 0)
+				{
+					m_distance += m_zoomVelocity * deltaTime;
+					m_zoomVelocity = m_zoomVelocity * pow(0.00001, deltaTime);
+				}
+
 				UpdateOrientation();
 				UpdateDirections();
 				UpdatePosition();

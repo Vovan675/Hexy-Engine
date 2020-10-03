@@ -21,6 +21,7 @@ namespace Hexy
 			glm::vec3 m_focalPoint = { 0, 0, 0 };
 
 			glm::vec3 m_forward, m_right, m_up;
+			float m_zoomVelocity = 0;
 		public:
 			bool isUsing = false;
 		public:
