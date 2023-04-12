@@ -1,0 +1,33 @@
+[
+    {
+        "ComponentsCount": 4,
+        "Id": 0,
+        "NameComponent": "Empty Entity",
+        "Id": 1,
+        "TransformComponent": {
+            "Position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "Scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            }
+        },
+        "Id": 2,
+        "MeshComponent": {
+            "Mesh path": "assets/models/blender/test2.fbx"
+        },
+        "Id": 3,
+        "ScriptComponent": {
+            "value0": "ScriptCustom.TestScript"
+        }
+    }
+]

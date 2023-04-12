@@ -147,11 +147,13 @@ project "Editor"
 
 	filter "system:windows"
 		systemversion "latest"
+		files { '%{prj.name}/resources.rc', '%{prj.name}/**.ico' }
 
 	filter "configurations:Debug"
 		symbols "On"
 		postbuildcommands {
 			'{COPY} "../%{prj.name}/EditorResources" "%{cfg.targetdir}/EditorResources"',
+			'{COPY} "../%{prj.name}/assets" "%{cfg.targetdir}/assets"',
 			'{COPY} "../%{prj.name}/mono" "%{cfg.targetdir}"/mono',
 			'{COPY} "../Hexy/vendor/Mono/bin/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
@@ -160,6 +162,7 @@ project "Editor"
 		optimize "On"
 		postbuildcommands {
 			'{COPY} "../%{prj.name}/EditorResources" "%{cfg.targetdir}/EditorResources"',
+			'{COPY} "../%{prj.name}/assets" "%{cfg.targetdir}/assets"',
 			'{COPY} "../%{prj.name}/mono" "%{cfg.targetdir}"/mono',
 			'{COPY} "../Hexy/vendor/Mono/bin/mono-2.0-sgen.dll" "%{cfg.targetdir}"',
 		}
