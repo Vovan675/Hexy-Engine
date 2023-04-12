@@ -53,7 +53,12 @@ namespace Hexy
 			return m_scene->m_registry.has<T>(m_entity);
 		}
 
-		operator uint32_t() 
+		operator uint32_t() const
+		{
+			return (uint32_t)m_entity;
+		}
+
+		operator uint32_t()
 		{
 			return (uint32_t)m_entity;
 		}

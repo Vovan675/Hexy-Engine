@@ -11,9 +11,11 @@ namespace ScriptCustom
     class TestScript : Entity
     {
         public float speed = 3.0f;
+        int count = 0;
         public void OnStart()
         {
             Console.WriteLine("Hello im OnStart() Function");
+            /*
             var entities = FindEntitiesByName("Empty Entity");
             int count = 0;
             ///Console.WriteLine(entities.Count);
@@ -29,11 +31,18 @@ namespace ScriptCustom
             material.Set("u_Albedo", new Vector3(1));
             material.Set("u_useAlbedoTexture", 0.0f);
             //material.Set("u_AlbedoTexture", new Texture2D("assets/textures/texture2.jpg"));
+            */
         }
 
         public void OnUpdate(float deltaTime)
         {
+            Console.WriteLine("Updating...." + count.ToString());
+            count++;
             TransformComponent comp = GetComponent<TransformComponent>();
+            
+            Console.WriteLine("ID: " + ID);
+            //Console.WriteLine(comp.ToString());
+            Console.WriteLine(comp.position);
 
             Vector3 translation = new Vector3(0);
             if (Input.IsKeyDown('A'))
@@ -44,6 +53,7 @@ namespace ScriptCustom
                 translation.y += speed;
             if (Input.IsKeyDown('S'))
                 translation.y -= speed;
+            Console.WriteLine("Translation: " + translation);
 
             comp.position = comp.position + translation * deltaTime;
         }

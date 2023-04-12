@@ -35,7 +35,10 @@
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/SpriteComponent.h"
 #include "ECS/Components/CameraComponent.h"
+#include "ECS/Components/ScriptComponent.h"
 
 #include "ECS/Entity.h"
 
 #include "Rendering/Scene.h"
+
+#include "Scripting/ScriptEngine.h"

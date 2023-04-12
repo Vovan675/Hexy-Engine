@@ -6,17 +6,60 @@
 #include "ECS/Components/NameComponent.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/ScriptComponent.h"
+
+#include "Scripting/ScriptEngine.h"
+
+#include "Utils/SceneManager.h"
 
 namespace Hexy 
 {
+	void OnScriptComponentConstuct(entt::registry& registry, entt::entity entity)
+	{
+		ScriptEngine::RegisterEntity(Entity(entity, SceneManager::GetCurrentScene()));
+	}
+
 	Scene::Scene()
 	{
-		
+		m_registry.on_construct<ScriptComponent>().connect<&OnScriptComponentConstuct>();
 	}
 
 	Scene::~Scene()
 	{
 		m_registry.clear();
+	}
+
+	void Scene::OnUpdate(float deltaTime)
+	{
+		{
+			auto view = m_registry.view<ScriptComponent>();
+			for (auto entity : view) {
+				Entity e(entity, this);
+				if (ScriptEngine::Exists(e.GetComponent<ScriptComponent>().script))
+				{
+					ScriptEngine::OnUpdate(e, deltaTime);
+				}
+			}
+		}
+	}
+
+	void Scene::OnRuntimeStart()
+	{
+		{
+			auto view = m_registry.view<ScriptComponent>();
+			for (auto entity : view) {
+				Entity e(entity, this);
+				if (ScriptEngine::Exists(e.GetComponent<ScriptComponent>().script))
+				{
+					ScriptEngine::InstantiateClass(e);
+					ScriptEngine::OnStart(e);
+				}
+			}
+		}
+	}
+
+	void Scene::OnRuntimeStop()
+	{
 	}
 
 	void Scene::OnRenderEditor(float deltaTime, std::vector<entt::entity>& selection)
@@ -50,7 +93,7 @@ namespace Hexy
 				auto [mesh, transform] = group.get<MeshComponent, TransformComponent>(entity);
 				SceneRenderer::SubmitMesh(mesh.mesh, transform.matrix);
 			}
-		}
+		}	
 	}
 
 	/*

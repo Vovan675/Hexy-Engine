@@ -19,6 +19,9 @@ namespace Hexy
 		~Scene();
 
 
+		void OnUpdate(float deltaTime);
+		void OnRuntimeStart();
+		void OnRuntimeStop();
 		void OnRenderEditor(float deltaTime, std::vector<entt::entity>& selection);
 		void OnRenderRuntime(float deltaTime);
 
@@ -35,7 +38,7 @@ namespace Hexy
 		auto GetEntitiesWith() {
 			return m_registry.view<T...>();
 		}
-		
+
 		//std::stringstream Serialize(bool binary);
 		//void Deserialize(std::stringstream& stream, bool binary);
 	private:

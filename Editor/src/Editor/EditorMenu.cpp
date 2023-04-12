@@ -21,6 +21,8 @@ namespace Hexy
 					}
 					if (ImGui::MenuItem("Load"))
 					{
+						EditorLayer::Selection.clear();
+						EditorLayer::SelectionContext.clear();
 						SceneManager::LoadScene("MainScene.hexy", isBinary);
 					}
 					if (ImGui::Checkbox("Binary", &isBinary));

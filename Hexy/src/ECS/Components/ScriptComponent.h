@@ -4,6 +4,6 @@ namespace Hexy
 	class ScriptComponent
 	{
 	public:
-		std::string script;
+		std::string script = "";
 	};
 }

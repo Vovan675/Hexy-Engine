@@ -8,6 +8,6 @@ namespace Hexy
 	{
 	public:
 		static void Serialize(Scene* scene, const std::string& fileName, bool binary = false);
-		static Scene* Deserialize(const std::string& fileName, bool binary = false);
+		static void Deserialize(Scene* scene, const std::string& fileName, bool binary = false);
 	};
 }

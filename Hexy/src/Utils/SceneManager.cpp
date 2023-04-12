@@ -22,7 +22,8 @@ namespace Hexy
 	Scene* SceneManager::LoadScene(const std::string& path, bool binary)
 	{
 		delete m_currentScene;
-		m_currentScene = SceneSerializer::Deserialize(path, binary);
+		m_currentScene = new Scene();
+		SceneSerializer::Deserialize(m_currentScene, path, binary);
 		return m_currentScene;
 	}
 }

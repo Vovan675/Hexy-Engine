@@ -94,6 +94,9 @@ namespace Hexy
 
 			bool modified = false;
 
+			if (error)
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+
 			if (ImGui::InputText(propertyIdText, buffer, 256)) {
 				value = buffer;
 				modified = true;
@@ -108,6 +111,10 @@ namespace Hexy
 				ImGui::NextColumn();
 				ImGui::PopItemWidth();
 			}
+
+			if (error)
+				ImGui::PopStyleColor();
+
 			return modified;
 		}
 

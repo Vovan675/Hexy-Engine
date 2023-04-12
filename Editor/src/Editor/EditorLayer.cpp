@@ -28,6 +28,7 @@ namespace Hexy
 		void EditorLayer::OnAttach()
 		{
 			rendererSettings = SceneRenderer::GetSettings();
+			ScriptEngine::LoadAssembly("assets/scripts/ScriptCustom.dll");
 			
 			int width;
 			int height;
@@ -37,9 +38,10 @@ namespace Hexy
 
 			Entity e = m_scene->CreateEntity();
 			auto& mesh = e.AddComponent<MeshComponent>().mesh;
-			mesh = Mesh::Create("assets/models/blender/test2.fbx");
-			//mesh = Mesh::Create("assets/models/1/Cerberus_LP.fbx");
-			//e.GetComponent<TransformComponent>().scale = { 0.01, 0.01, 0.01 };
+			//mesh = Mesh::Create("assets/models/blender/test2.fbx");
+			e.AddComponent<ScriptComponent>("ScriptCustom.TestScript");
+			mesh = Mesh::Create("assets/models/1/Cerberus_LP.fbx");
+			e.GetComponent<TransformComponent>().scale = { 0.01, 0.01, 0.01 };
 			//mesh = Mesh::Create("assets/models/sphere.fbx");
 			entityMaterial = mesh->GetMaterials()[0];
 
@@ -56,13 +58,13 @@ namespace Hexy
 			m_NormalInput.texture = TextureLibrary::Load("assets/textures/sci/normal.png");
 			m_AOInput.texture = TextureLibrary::Load("assets/textures/sci/ao.png");
 			*/
-			/*
+			
 			m_AlbedoInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_A.tga");
 			m_MetalnessInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_M.tga");
 			m_RoughnessInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_R.tga");
 			m_NormalInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_N.tga");
 			m_AOInput.texture = TextureLibrary::Load("assets/models/1/Textures/Raw/Cerberus_AO.tga");
-			*/
+			
 			/*
 			entityMaterial->Set("u_MetalnessTexture", TextureLibrary::Load("assets/models/1/Textures/Cerberus_M.tga"));
 			entityMaterial->Set("u_useMetalnessTexture", 1.0f);
@@ -82,7 +84,15 @@ namespace Hexy
 		void EditorLayer::OnUpdate(double deltaTime)
 		{
 			SceneRenderer::SetSettings(rendererSettings);
-			SceneManager::GetCurrentScene()->OnRenderEditor(deltaTime, SelectionContext);
+			if (m_editorState == PLAY)
+			{
+				SceneManager::GetCurrentScene()->OnUpdate(deltaTime);
+				SceneManager::GetCurrentScene()->OnRenderRuntime(deltaTime);
+			}
+			else if (m_editorState == STOP)
+			{
+				SceneManager::GetCurrentScene()->OnRenderEditor(deltaTime, SelectionContext);
+			}
 
 			editorScene->OnUpdate(); //For rendering into editor camera
 			///Renderer::Render(CameraComponent::activeCamera);
@@ -136,16 +146,18 @@ namespace Hexy
 				ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_None);
 				ImGui::DockBuilderSetNodeSize(dockId, viewport->Size);
 
-				ImGuiID leftId, leftUpId, leftDownId, middleId, rightId, rightUpId, rightDownId;
+				ImGuiID leftId, leftUpId, leftDownId, middleId, middleUpId, middleDownId, rightId, rightUpId, rightDownId;
 				ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, 0.3f, &leftId, &middleId); //Left and middle
 				ImGui::DockBuilderSplitNode(leftId, ImGuiDir_Up, 0.3f, &leftUpId, &leftDownId); //Left(up and down)
 				ImGui::DockBuilderSplitNode(middleId, ImGuiDir_Left, 0.65f, &middleId, &rightId); //middle and right
-				ImGui::DockBuilderSplitNode(rightId, ImGuiDir_Up, 0.65f, &rightUpId, &rightDownId); //middle and right
-				ImGui::DockBuilderDockWindow("Hierachy", leftUpId);
+				ImGui::DockBuilderSplitNode(middleId, ImGuiDir_Down, 0.85f, &middleUpId, &middleDownId); //middle up and middle down
+				ImGui::DockBuilderSplitNode(rightId, ImGuiDir_Up, 0.65f, &rightUpId, &rightDownId); //right up and right down
+				ImGui::DockBuilderDockWindow("Hierarchy", leftUpId);
 				ImGui::DockBuilderDockWindow("Inspector", leftDownId);
 				ImGui::DockBuilderDockWindow("MaterialEditor", rightUpId);
 				ImGui::DockBuilderDockWindow("Settings", rightDownId);
-				ImGui::DockBuilderDockWindow("Viewport", middleId);
+				ImGui::DockBuilderDockWindow("Toolbar", middleUpId);
+				ImGui::DockBuilderDockWindow("Viewport", middleDownId);
 
 				ImGui::DockBuilderFinish(dockId);
 			}
@@ -159,6 +171,23 @@ namespace Hexy
 			//Settings
 			ImGui::Begin("Settings");
 			ImGui::Checkbox("Show AABB", &rendererSettings.ShowBoundingBoxes);
+			ImGui::End();
+
+			//Toolbar
+			ImGui::Begin("Toolbar");
+			if (ImGui::Button("Play/Stop"))
+			{
+				if (m_editorState == PLAY)
+				{
+					SceneManager::GetCurrentScene()->OnRuntimeStop();
+					m_editorState = STOP;
+				}
+				else if (m_editorState == STOP)
+				{
+					SceneManager::GetCurrentScene()->OnRuntimeStart();
+					m_editorState = PLAY;
+				}
+			}
 			ImGui::End();
 
 			//Material Editor

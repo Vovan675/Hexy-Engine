@@ -70,6 +70,23 @@ namespace Hexy
 					EndGrid();
 				});
 
+				DrawComponent<ScriptComponent>("Script", entity, [entity](ScriptComponent& script) {
+					BeginGrid(3);
+					auto oldScript = script.script;
+					if (Property("Script", script.script, !ScriptEngine::Exists(oldScript)))
+					{
+						if (ScriptEngine::Exists(oldScript))
+						{
+							ScriptEngine::DestroyScript(entity);
+						}
+						if (ScriptEngine::Exists(script.script))
+						{
+							ScriptEngine::RegisterEntity(entity);
+						}
+					}
+					EndGrid();
+					});
+
 				if (ImGui::Button("Add Component"))
 					ImGui::OpenPopup("add_component_popup");
 
@@ -81,6 +98,8 @@ namespace Hexy
 						entity.AddComponent<SpriteComponent>();
 					if (ImGui::MenuItem("Camera Component"))
 						entity.AddComponent<CameraComponent>();
+					if (ImGui::MenuItem("Script Component"))
+						entity.AddComponent<ScriptComponent>();
 
 					ImGui::EndPopup();
 				}

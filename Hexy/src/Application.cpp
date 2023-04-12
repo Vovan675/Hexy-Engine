@@ -6,6 +6,7 @@
 #include "Rendering/Renderer.h"
 #include "Rendering/Renderer2D.h"
 #include "Rendering/SceneRenderer.h"
+#include "Scripting/ScriptEngine.h"
 
 namespace Hexy
 {
@@ -61,11 +62,12 @@ namespace Hexy
 		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
-		
+
 		Log::Init();
 		Renderer::Init();
 		Renderer2D::Init();
 		SceneRenderer::Init();
+		ScriptEngine::Init();
 
 		m_imgui = new ImGuiLayer();
 		PushLayer(m_imgui);

@@ -17,8 +17,11 @@ namespace Hexy
 		private:
 			SceneRenderingSettings rendererSettings;
 
-			Entity* testEntity;
-			Entity* cameraEntity;
+			enum EditorState
+			{
+				PLAY,
+				STOP
+			} m_editorState = STOP;
 
 			Scene* m_scene;
 			EditorHierarchy* editorHierarchy;

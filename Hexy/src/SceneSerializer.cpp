@@ -12,6 +12,7 @@
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/SpriteComponent.h"
 #include "ECS/Components/CameraComponent.h"
+#include "ECS/Components/ScriptComponent.h"
 
 namespace glm
 {
@@ -28,9 +29,10 @@ namespace Hexy
 {
     enum class ObjectIds
     {
-        NameComponent,
-        TransformComponent,
-        MeshComponent
+        NameComponentID,
+        TransformComponentID,
+        MeshComponentID,
+        ScriptComponentID
     };
 
 
@@ -66,6 +68,12 @@ namespace Hexy
         mesh.mesh = Mesh::Create(path);
     }
 
+	template<class Archive>
+	static void serialize(Archive& archive, ScriptComponent& script)
+	{
+        archive(script.script);
+	}
+
 
     template<class Archive>
     static void save(Archive& archive, Entity const& entity)
@@ -74,25 +82,31 @@ namespace Hexy
 
         if (entity.HasComponent<NameComponent>()) componentsCount++;
         if (entity.HasComponent<TransformComponent>()) componentsCount++;
-        if (entity.HasComponent<MeshComponent>()) componentsCount++;
+		if (entity.HasComponent<MeshComponent>()) componentsCount++;
+		if (entity.HasComponent<ScriptComponent>()) componentsCount++;
 
         archive(cereal::make_nvp("ComponentsCount", componentsCount));
 
         if (entity.HasComponent<NameComponent>())
         {
-            archive(cereal::make_nvp("Id", ObjectIds::NameComponent));
+            archive(cereal::make_nvp("Id", ObjectIds::NameComponentID));
             archive(cereal::make_nvp("NameComponent", entity.GetComponent<NameComponent>().Name));
         }
         if (entity.HasComponent<TransformComponent>())
         {
-            archive(cereal::make_nvp("Id", ObjectIds::TransformComponent));
+            archive(cereal::make_nvp("Id", ObjectIds::TransformComponentID));
             archive(cereal::make_nvp("TransformComponent", entity.GetComponent<TransformComponent>()));
         }
         if (entity.HasComponent<MeshComponent>())
         {
-            archive(cereal::make_nvp("Id", ObjectIds::MeshComponent));
+            archive(cereal::make_nvp("Id", ObjectIds::MeshComponentID));
             archive(cereal::make_nvp("MeshComponent", entity.GetComponent<MeshComponent>()));
         }
+		if (entity.HasComponent<ScriptComponent>())
+		{
+			archive(cereal::make_nvp("Id", ObjectIds::ScriptComponentID));
+			archive(cereal::make_nvp("ScriptComponent", entity.GetComponent<ScriptComponent>()));
+		}
     }
 
     template<class Archive>
@@ -105,21 +119,26 @@ namespace Hexy
         for (int i = 0; i < componentsCount; i++)
         {
             archive(cereal::make_nvp("Id", id));
-            if (id == ObjectIds::NameComponent)
+            if (id == ObjectIds::NameComponentID)
             {
                 entity.AddComponent<NameComponent>();
                 archive(cereal::make_nvp("NameComponent", entity.GetComponent<NameComponent>().Name));
             }
-            else if (id == ObjectIds::TransformComponent)
+            else if (id == ObjectIds::TransformComponentID)
             {
                 entity.AddComponent<TransformComponent>();
                 archive(cereal::make_nvp("TransformComponent", entity.GetComponent<TransformComponent>()));
             }
-            else if (id == ObjectIds::MeshComponent)
+            else if (id == ObjectIds::MeshComponentID)
             {
                 entity.AddComponent<MeshComponent>();
                 archive(cereal::make_nvp("MeshComponent", entity.GetComponent<MeshComponent>()));
             }
+			else if (id == ObjectIds::ScriptComponentID)
+			{
+				entity.AddComponent<ScriptComponent>();
+				archive(cereal::make_nvp("ScriptComponent", entity.GetComponent<ScriptComponent>()));
+			}
         }
     }
 
@@ -151,10 +170,9 @@ namespace Hexy
         }
     }
 
-    Scene* SceneSerializer::Deserialize(const std::string& fileName, bool binary)
+    void SceneSerializer::Deserialize(Scene* scene, const std::string& fileName, bool binary)
     {
         std::ifstream is(fileName);
-        Scene* scene = new Scene();
         if (binary)
         {
             cereal::BinaryInputArchive archive(is);
@@ -179,6 +197,5 @@ namespace Hexy
                 archive(entity);
             }
         }
-        return scene;
     }
 }
