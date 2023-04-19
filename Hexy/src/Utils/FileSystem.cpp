@@ -25,6 +25,28 @@ namespace Hexy
 		}
 	}
 
+	std::string FileSystem::SaveFileDialog()
+	{
+		std::filesystem::path currentPath = std::filesystem::current_path();//Needs to be saved, because winapi will change it after open file dialog
+		IFileSaveDialog* fileSaveDialog(NULL);
+		HRESULT result = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_PPV_ARGS(&fileSaveDialog));
+		if (SUCCEEDED(result))
+		{
+			if (SUCCEEDED(fileSaveDialog->Show(nullptr)))
+			{
+				IShellItem* pItem;
+				fileSaveDialog->GetResult(&pItem);
+				PWSTR pszFilePath;
+				pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath);
+				char fileName[500];
+				wcstombs(fileName, pszFilePath, 500);
+				std::filesystem::current_path(currentPath);
+				return fileName;
+			}
+		}
+		return "";
+	}
+
 	std::string FileSystem::OpenFileDialog()
 	{
 		std::filesystem::path currentPath = std::filesystem::current_path();//Needs to be saved, because winapi will change it after open file dialog

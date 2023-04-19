@@ -8,6 +8,7 @@ namespace Hexy
 		static void WriteStringStream(const std::string& path, std::stringstream& stream, bool binary = false);
 
 		//In future for multiOS support it must be refactored
+		static std::string SaveFileDialog();
 		static std::string OpenFileDialog();
 		static std::string OpenFolderDialog();
 	};

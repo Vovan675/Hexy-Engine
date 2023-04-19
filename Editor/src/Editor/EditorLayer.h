@@ -7,6 +7,7 @@
 #include "EditorInspector.h"
 #include "EditorScene.h"
 #include "EditorMenu.h"
+#include "EditorAssetBrowser.h"
 
 namespace Hexy
 {
@@ -28,6 +29,7 @@ namespace Hexy
 			EditorInspector* editorInspector;
 			EditorScene* editorScene;
 			EditorMenu* editorMenu;
+			EditorAssetBrowser* editorAssetBrowser;
 
 			std::shared_ptr<Material> entityMaterial;//In future it must be deleted(ASAP)
 		public:
@@ -36,6 +38,7 @@ namespace Hexy
 
 			void SetUniforms();//In future it must be deleted(ASAP)
 			void OnAttach();
+			void OnDetach();
 			void OnUpdate(double deltaTime);
 			bool OnMouseButtonEvent(int button, int action);
 			bool OnScrollEvent(int xScroll, int yScroll);

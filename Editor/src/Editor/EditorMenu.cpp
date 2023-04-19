@@ -17,13 +17,21 @@ namespace Hexy
 					static bool isBinary = false;
 					if (ImGui::MenuItem("Save"))
 					{
-						SceneSerializer::Serialize(SceneManager::GetCurrentScene(), "MainScene.hexy", isBinary);
+						std::string filePath = FileSystem::SaveFileDialog();
+						if (filePath != "")
+						{
+							SceneSerializer::Serialize(SceneManager::GetCurrentScene(), filePath, isBinary);
+						}
 					}
 					if (ImGui::MenuItem("Load"))
 					{
 						EditorLayer::Selection.clear();
 						EditorLayer::SelectionContext.clear();
-						SceneManager::LoadScene("MainScene.hexy", isBinary);
+						std::string filePath = FileSystem::OpenFileDialog();
+						if (filePath != "")
+						{
+							SceneManager::LoadScene(filePath, isBinary);
+						}
 					}
 					if (ImGui::Checkbox("Binary", &isBinary));
 					ImGui::EndMenu();

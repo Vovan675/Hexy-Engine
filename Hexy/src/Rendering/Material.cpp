@@ -13,6 +13,24 @@ namespace Hexy
 		ao = TextureLibrary::LoadBlankTexture();
 
 		m_uniformsData = new unsigned char[1024];
+
+		Set("u_useAlbedoTexture", 0.0f);
+		Set("u_AlbedoTexture", albedo);
+		Set("u_Albedo", {0, 0, 0});
+
+		Set("u_useMetalnessTexture", 0.0f);
+		Set("u_MetalnessTexture", metalness);
+		Set("u_Metalness", 0.0f);
+
+		Set("u_useRoughnessTexture", 0.0f);
+		Set("u_RoughnessTexture", roughness);
+		Set("u_Roughness", 0.0f);
+
+		Set("u_useNormalTexture", 0.0f);
+		Set("u_NormalTexture", normal);
+
+		Set("u_useAOTexture", 0.0f);
+		Set("u_AOTexture", ao);
 	}
 
 	Material::~Material()
@@ -22,9 +40,9 @@ namespace Hexy
 
 	void Material::Bind()
 	{
-		//Set basic unifors
+		//Set basic uniforms
 		shader->Bind();
-		for (auto uniform : m_uniforms) 
+		for (auto uniform : m_uniforms)
 		{
 			if (uniform.type == ShaderUniform::Int)
 			{
@@ -34,17 +52,17 @@ namespace Hexy
 			{
 				shader->SetFloat(uniform.name, *(float*)&m_uniformsData[uniform.offset]);
 			}
-			else if (uniform.type == ShaderUniform::Vec2) 
+			else if (uniform.type == ShaderUniform::Vec2)
 			{
 				shader->SetVec2(uniform.name, *(glm::vec2*)&m_uniformsData[uniform.offset]);
 			}
-			else if (uniform.type == ShaderUniform::Vec3) 
+			else if (uniform.type == ShaderUniform::Vec3)
 			{
-				shader->SetVec3(uniform.name, *(glm::vec3*) & m_uniformsData[uniform.offset]);
+				shader->SetVec3(uniform.name, *(glm::vec3*)&m_uniformsData[uniform.offset]);
 			}
-			else if (uniform.type == ShaderUniform::Vec4) 
+			else if (uniform.type == ShaderUniform::Vec4)
 			{
-				shader->SetVec4(uniform.name, *(glm::vec4*) & m_uniformsData[uniform.offset]);
+				shader->SetVec4(uniform.name, *(glm::vec4*)&m_uniformsData[uniform.offset]);
 			}
 		}
 
@@ -148,6 +166,19 @@ namespace Hexy
 			}
 		}
 		return nullptr;
+	}
+
+	float Material::GetFloat(const std::string& name)
+	{
+		for (auto uniform : m_uniforms)
+		{
+			if (uniform.type == ShaderUniform::Float && uniform.name == name)
+			{
+				return *(float*)&m_uniformsData[uniform.offset];
+
+			}
+		}
+		return 0;
 	}
 
 

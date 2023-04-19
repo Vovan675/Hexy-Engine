@@ -81,6 +81,11 @@ namespace Hexy
 			}
 
 			//Ray Selection
+			if (Input::IsKeyDown('C'))
+			{
+				EditorLayer::Selection.clear();
+				EditorLayer::SelectionContext.clear();
+			}
 
 			static bool leftMouseDown = false;
 			if (Input::IsMouseButtonDown(0) == 0)

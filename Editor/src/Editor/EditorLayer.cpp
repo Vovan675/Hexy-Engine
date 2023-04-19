@@ -9,6 +9,8 @@ namespace Hexy
 
 		void EditorLayer::SetUniforms()
 		{
+			if (entityMaterial == nullptr)
+				return;
 			entityMaterial->Set("u_AlbedoTexture", m_AlbedoInput.texture);
 			entityMaterial->Set("u_useAlbedoTexture", (float)m_AlbedoInput.useTexture);
 
@@ -38,18 +40,25 @@ namespace Hexy
 
 			Entity e = m_scene->CreateEntity();
 			auto& mesh = e.AddComponent<MeshComponent>().mesh;
+			//mesh = Mesh::Create("assets/models/1/Cerberus_LP.fbx");
+			mesh = Mesh::Create("assets/models/blender/Test5/ass.fbx");
+			e.GetComponent<TransformComponent>().scale = { 0.1, 0.1, 0.1 };
+
+			Entity e2 = m_scene->CreateEntity();
+			auto& mesh2 = e2.AddComponent<MeshComponent>().mesh;
+			mesh2 = Mesh::Create("assets/models/blender/test2.fbx");
+			e2.AddComponent<ScriptComponent>("ScriptCustom.TestScript");
 			//mesh = Mesh::Create("assets/models/blender/test2.fbx");
-			e.AddComponent<ScriptComponent>("ScriptCustom.TestScript");
-			mesh = Mesh::Create("assets/models/1/Cerberus_LP.fbx");
-			e.GetComponent<TransformComponent>().scale = { 0.01, 0.01, 0.01 };
+			//e.GetComponent<TransformComponent>().scale = { 0.01, 0.01, 0.01 };
 			//mesh = Mesh::Create("assets/models/sphere.fbx");
-			entityMaterial = mesh->GetMaterials()[0];
+			//entityMaterial = mesh->GetMaterials()[0];
 
 
 			editorHierarchy = new EditorHierarchy();
 			editorInspector = new EditorInspector();
 			editorScene = new EditorScene();
 			editorMenu = new EditorMenu();
+			editorAssetBrowser = new EditorAssetBrowser();
 
 			/*
 			m_AlbedoInput.texture = TextureLibrary::Load("assets/textures/sci/albedo.png");
@@ -58,13 +67,15 @@ namespace Hexy
 			m_NormalInput.texture = TextureLibrary::Load("assets/textures/sci/normal.png");
 			m_AOInput.texture = TextureLibrary::Load("assets/textures/sci/ao.png");
 			*/
-			
+
+			/*
 			m_AlbedoInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_A.tga");
 			m_MetalnessInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_M.tga");
 			m_RoughnessInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_R.tga");
 			m_NormalInput.texture = TextureLibrary::Load("assets/models/1/Textures/Cerberus_N.tga");
 			m_AOInput.texture = TextureLibrary::Load("assets/models/1/Textures/Raw/Cerberus_AO.tga");
-			
+			*/
+
 			/*
 			entityMaterial->Set("u_MetalnessTexture", TextureLibrary::Load("assets/models/1/Textures/Cerberus_M.tga"));
 			entityMaterial->Set("u_useMetalnessTexture", 1.0f);
@@ -81,6 +92,17 @@ namespace Hexy
 
 			SetUniforms();
 		}
+
+		void EditorLayer::OnDetach()
+		{
+			delete editorHierarchy;
+			delete editorInspector;
+			delete editorScene;
+			delete editorMenu;
+			delete editorAssetBrowser;
+			delete m_scene;
+		}
+
 		void EditorLayer::OnUpdate(double deltaTime)
 		{
 			SceneRenderer::SetSettings(rendererSettings);
@@ -167,6 +189,7 @@ namespace Hexy
 			editorInspector->OnImgui();
 			editorScene->OnImgui();
 			editorMenu->OnImgui();
+			editorAssetBrowser->OnImgui();
 
 			//Settings
 			ImGui::Begin("Settings");
@@ -192,115 +215,147 @@ namespace Hexy
 
 			//Material Editor
 			
+			
 			ImGui::Begin("MaterialEditor");
 			
-			//Albedo
-			if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen)) 
-			{
-				if (ImGui::Checkbox("Use Albedo Texture", &m_AlbedoInput.useTexture)) 
-				{
-					entityMaterial->Set("u_useAlbedoTexture", (float)m_AlbedoInput.useTexture);
-				}
 
-				ImGui::Image((ImTextureID)m_AlbedoInput.texture->GetTexture(), { 64, 64 });
-				if (ImGui::IsItemClicked())
+			if (SelectionContext.size() == 1)
+			{
+				Entity entity = Entity(SelectionContext[0], SceneManager::GetCurrentScene());
+				auto& materials = entity.GetComponent<MeshComponent>().mesh->GetMaterials();
+				if (materials[0] != entityMaterial)
 				{
-					std::string file = FileSystem::OpenFileDialog();
-					if (file != "") 
+					//Update material
+					entityMaterial = materials[0];
+					m_AlbedoInput.texture = entityMaterial->Get("u_AlbedoTexture");
+					m_AlbedoInput.useTexture = entityMaterial->GetFloat("u_useAlbedoTexture");
+					m_MetalnessInput.texture = entityMaterial->Get("u_MetalnessTexture");
+					m_MetalnessInput.useTexture = entityMaterial->GetFloat("u_useMetalnessTexture");
+					m_RoughnessInput.texture = entityMaterial->Get("u_RoughnessTexture");
+					m_RoughnessInput.useTexture = entityMaterial->GetFloat("u_useRoughnessTexture");
+					m_NormalInput.texture = entityMaterial->Get("u_NormalTexture");
+					m_NormalInput.useTexture = entityMaterial->GetFloat("u_useNormalTexture");
+					m_AOInput.texture = entityMaterial->Get("u_AOTexture");
+					m_AOInput.useTexture = entityMaterial->GetFloat("u_useAOTexture");
+				}
+				//Albedo
+				if (ImGui::CollapsingHeader("Albedo", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					if (ImGui::Checkbox("Use Albedo Texture", &m_AlbedoInput.useTexture))
 					{
-						m_AlbedoInput.texture = Texture2D::Create(file);
-						entityMaterial->Set("u_AlbedoTexture", m_AlbedoInput.texture);
+						entityMaterial->Set("u_useAlbedoTexture", (float)m_AlbedoInput.useTexture);
+					}
+					auto texture = entityMaterial->Get("u_AlbedoTexture");
+					if (texture == nullptr)
+						texture = TextureLibrary::LoadBlankTexture();
+					ImGui::Image((ImTextureID)texture->GetTexture(), { 64, 64 });
+					if (ImGui::IsItemClicked())
+					{
+						std::string file = FileSystem::OpenFileDialog();
+						if (file != "")
+						{
+							m_AlbedoInput.texture = Texture2D::Create(file);
+							entityMaterial->Set("u_AlbedoTexture", m_AlbedoInput.texture);
+						}
+					}
+
+					if (ImGui::ColorEdit3("Color", glm::value_ptr(m_AlbedoInput.color), ImGuiColorEditFlags_NoInputs))
+					{
+						entityMaterial->Set("u_Albedo", m_AlbedoInput.color);
 					}
 				}
-
-				if (ImGui::ColorEdit3("Color", glm::value_ptr(m_AlbedoInput.color), ImGuiColorEditFlags_NoInputs))
+				//Metalness
+				if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					entityMaterial->Set("u_Albedo", m_AlbedoInput.color);
-				}
-			}
-			//Metalness
-			if (ImGui::CollapsingHeader("Metalness", ImGuiTreeNodeFlags_DefaultOpen)) 
-			{
-				if (ImGui::Checkbox("Use Metalness Texture", &m_MetalnessInput.useTexture)) 
-				{
-					entityMaterial->Set("u_useMetalnessTexture", (float)m_MetalnessInput.useTexture);
-				}
-
-				ImGui::Image((ImTextureID)m_MetalnessInput.texture->GetTexture(), { 64, 64 });
-				if (ImGui::IsItemClicked())
-				{
-					std::string file = FileSystem::OpenFileDialog();
-					if (file != "")
+					if (ImGui::Checkbox("Use Metalness Texture", &m_MetalnessInput.useTexture))
 					{
-						m_MetalnessInput.texture = Texture2D::Create(file);
-						entityMaterial->Set("u_MetalnessTexture", m_MetalnessInput.texture);
+						entityMaterial->Set("u_useMetalnessTexture", (float)m_MetalnessInput.useTexture);
+					}
+					auto texture = entityMaterial->Get("u_MetalnessTexture");
+					if (texture == nullptr)
+						texture = TextureLibrary::LoadBlankTexture();
+					ImGui::Image((ImTextureID)texture->GetTexture(), { 64, 64 });
+					if (ImGui::IsItemClicked())
+					{
+						std::string file = FileSystem::OpenFileDialog();
+						if (file != "")
+						{
+							m_MetalnessInput.texture = Texture2D::Create(file);
+							entityMaterial->Set("u_MetalnessTexture", m_MetalnessInput.texture);
+						}
+					}
+
+					if (ImGui::DragFloat("Metalness##Color", &m_MetalnessInput.value, 0.01f, 0.0f, 1.0f))
+					{
+						entityMaterial->Set("u_Metalness", m_MetalnessInput.value);
 					}
 				}
-
-				if (ImGui::DragFloat("Metalness##Color", &m_MetalnessInput.value, 0.01f, 0.0f, 1.0f))
+				//Roughness
+				if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					entityMaterial->Set("u_Metalness", m_MetalnessInput.value);
-				}
-			}
-			//Roughness
-			if (ImGui::CollapsingHeader("Roughness", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				if (ImGui::Checkbox("Use Roughness Texture", &m_RoughnessInput.useTexture))
-				{
-					entityMaterial->Set("u_useRoughnessTexture", (float)m_RoughnessInput.useTexture);
-				}
-
-				ImGui::Image((ImTextureID)m_RoughnessInput.texture->GetTexture(), { 64, 64 });
-				if (ImGui::IsItemClicked()) 
-				{
-					std::string file = FileSystem::OpenFileDialog();
-					if (file != "") 
+					if (ImGui::Checkbox("Use Roughness Texture", &m_RoughnessInput.useTexture))
 					{
-						m_RoughnessInput.texture = Texture2D::Create(file);
-						entityMaterial->Set("u_RoughnessTexture", m_RoughnessInput.texture);
+						entityMaterial->Set("u_useRoughnessTexture", (float)m_RoughnessInput.useTexture);
+					}
+					auto texture = entityMaterial->Get("u_RoughnessTexture");
+					if (texture == nullptr)
+						texture = TextureLibrary::LoadBlankTexture();
+					ImGui::Image((ImTextureID)texture->GetTexture(), { 64, 64 });
+					if (ImGui::IsItemClicked())
+					{
+						std::string file = FileSystem::OpenFileDialog();
+						if (file != "")
+						{
+							m_RoughnessInput.texture = Texture2D::Create(file);
+							entityMaterial->Set("u_RoughnessTexture", m_RoughnessInput.texture);
+						}
+					}
+
+					if (ImGui::DragFloat("Roughness##Color", &m_RoughnessInput.value, 0.01f, 0.0f, 1.0f))
+					{
+						entityMaterial->Set("u_Roughness", m_RoughnessInput.value);
 					}
 				}
-
-				if (ImGui::DragFloat("Roughness##Color", &m_RoughnessInput.value, 0.01f, 0.0f, 1.0f)) 
+				//Normal
+				if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					entityMaterial->Set("u_Roughness", m_RoughnessInput.value);
-				}
-			}
-			//Normal
-			if (ImGui::CollapsingHeader("Normal", ImGuiTreeNodeFlags_DefaultOpen)) 
-			{
-				if (ImGui::Checkbox("Use Normal Texture", &m_NormalInput.useTexture)) 
-				{
-					entityMaterial->Set("u_useNormalTexture", (float)m_NormalInput.useTexture);
-				}
-
-				ImGui::Image((ImTextureID)m_NormalInput.texture->GetTexture(), { 64, 64 });
-				if (ImGui::IsItemClicked())
-				{
-					std::string file = FileSystem::OpenFileDialog();
-					if (file != "")
+					if (ImGui::Checkbox("Use Normal Texture", &m_NormalInput.useTexture))
 					{
-						m_NormalInput.texture = Texture2D::Create(file);
-						entityMaterial->Set("u_NormalTexture", m_NormalInput.texture);
+						entityMaterial->Set("u_useNormalTexture", (float)m_NormalInput.useTexture);
+					}
+					auto texture = entityMaterial->Get("u_NormalTexture");
+					if (texture == nullptr)
+						texture = TextureLibrary::LoadBlankTexture();
+					ImGui::Image((ImTextureID)texture->GetTexture(), { 64, 64 });
+					if (ImGui::IsItemClicked())
+					{
+						std::string file = FileSystem::OpenFileDialog();
+						if (file != "")
+						{
+							m_NormalInput.texture = Texture2D::Create(file);
+							entityMaterial->Set("u_NormalTexture", m_NormalInput.texture);
+						}
 					}
 				}
-			}
-			//AO
-			if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				if (ImGui::Checkbox("Use AO Texture", &m_AOInput.useTexture)) 
+				//AO
+				if (ImGui::CollapsingHeader("AO", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					entityMaterial->Set("u_useAOTexture", (float)m_AOInput.useTexture);
-				}
-
-				ImGui::Image((ImTextureID)m_AOInput.texture->GetTexture(), { 64, 64 });
-				if (ImGui::IsItemClicked()) 
-				{
-					std::string file = FileSystem::OpenFileDialog();
-					if (file != "") 
+					if (ImGui::Checkbox("Use AO Texture", &m_AOInput.useTexture))
 					{
-						m_AOInput.texture = Texture2D::Create(file);
-						entityMaterial->Set("u_AOTexture", m_AOInput.texture);
+						entityMaterial->Set("u_useAOTexture", (float)m_AOInput.useTexture);
+					}
+					auto texture = entityMaterial->Get("u_AOTexture");
+					if (texture == nullptr)
+						texture = TextureLibrary::LoadBlankTexture();
+					ImGui::Image((ImTextureID)texture->GetTexture(), { 64, 64 });
+					if (ImGui::IsItemClicked())
+					{
+						std::string file = FileSystem::OpenFileDialog();
+						if (file != "")
+						{
+							m_AOInput.texture = Texture2D::Create(file);
+							entityMaterial->Set("u_AOTexture", m_AOInput.texture);
+						}
 					}
 				}
 			}

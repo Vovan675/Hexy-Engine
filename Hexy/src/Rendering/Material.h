@@ -34,6 +34,7 @@ namespace Hexy
 
 		std::shared_ptr<Texture2D> Get(const std::string& name);
 
+		float GetFloat(const std::string& name);
 		const std::shared_ptr<Shader>& GetShader() { return shader; }
 	};
 
